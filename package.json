@@ -1,0 +1,28 @@
+{
+  "name": "geojson2png",
+  "module": "src/server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/server.ts",
+    "dev": "bun run --watch src/server.ts",
+    "up": "npx npm-check-updates --interactive --format group"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.11",
+    "@types/proj4": "^2.5.3",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@elysiajs/bearer": "^0.7.0",
+    "@turf/turf": "^6.5.0",
+    "elysia": "^0.7.16",
+    "geojson2svg": "^2.0.1",
+    "lru-cache": "^10.0.1",
+    "proj4": "^2.9.1",
+    "quick-lru": "^7.0.0",
+    "sharp": "0.33.0-alpha.6"
+  }
+}
