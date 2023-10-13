@@ -1,18 +1,13 @@
 import { Elysia, t } from 'elysia';
 import { bearer } from '@elysiajs/bearer';
-import { LRUCache } from 'lru-cache';
+import Redis from 'ioredis';
 
 import { FeatureCollection } from './geojson';
 import { renderGeoJSON } from './render';
 import { Config } from './config';
 
-const cache = new LRUCache<string, Buffer>({
-  max: Config.GEOJSON2PNG_MAX,
-  maxSize: Config.GEOJSON2PNG_MAX_ITEM_SIZE * Config.GEOJSON2PNG_MAX,
-  maxEntrySize: Config.GEOJSON2PNG_MAX_ITEM_SIZE,
-  sizeCalculation: (buffer) => buffer.length,
-  ttl: Config.GEOJSON2PNG_TTL,
-});
+const cache = new Redis(Config.REDIS_URL);
+cache.on('error', (err) => console.error('Redis Client Error', err));
 
 class BadRequestError extends Error {
   constructor(public message: string) {
@@ -44,12 +39,12 @@ const app = new Elysia()
     '/v1',
     async ({ body: { featureCollection, ...options } }) => {
       const key = sha256(JSON.stringify([featureCollection, options]));
-      let buffer = cache.get(key);
+      let buffer = await cache.getBuffer(key);
 
       if (!buffer) {
         try {
           buffer = await renderGeoJSON(featureCollection, options);
-          cache.set(key, buffer);
+          cache.set(key, buffer, 'EX', 60 * 60);
         } catch (error) {
           throw new BadRequestError((error as Error).message);
         }
