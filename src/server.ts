@@ -28,15 +28,16 @@ class UnauthorizedError extends Error {
 
 const app = new Elysia()
   .use(bearer())
-  .addError({
+  .error({
     BAD_REQUEST: BadRequestError,
     UNAUTHORIZED_REQUEST: UnauthorizedError,
   })
   .onError(({ code, error }) => {
-    if (code == 'BAD_REQUEST') {
-      return new Response(error.message, { status: 400 });
-    } else if (code == 'UNAUTHORIZED_REQUEST') {
-      return new Response(error.message, { status: 401 });
+    switch (code) {
+      case 'BAD_REQUEST':
+        return new Response(error.message, { status: 400 });
+      case 'UNAUTHORIZED_REQUEST':
+        return new Response(error.message, { status: 401 });
     }
   })
   .post(
